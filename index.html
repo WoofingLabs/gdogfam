@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>GDOG社区</title>
+    <link rel="icon" type="image/png" href="https://www.woofswap.finance/image/tokens/gdog.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0068FF',
+                        secondary: '#18E5A0',
+                        accent: '#FFD700',
+                        dark: '#070808',
+                        'light-gray': '#E5E7EB'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        display: ['Changa One', 'system-ui', 'sans-serif']
+                    },
+                    animation: {
+                        'float': 'float 3s ease-in-out infinite'
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-8px)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .text-shadow-glow {
+                text-shadow: 0 0 10px rgba(0, 104, 255, 0.5);
+            }
+            .glow-border {
+                box-shadow: 0 0 12px rgba(24, 229, 160, 0.3);
+            }
+            .bg-grid {
+                background-image: url('data:image/svg+xml,%3Csvg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"%3E%3Ccircle cx="1" cy="1" r="1" fill="%230068FF" fill-opacity="0.1"/%3E%3C/svg%3E');
+                background-size: 20px 20px;
+            }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&family=Changa+One&display=swap" rel="stylesheet">
+</head>
+<body class="bg-dark text-white font-sans overflow-x-hidden">
+    <header class="fixed w-full z-50 bg-dark/90 backdrop-blur-md transition-all duration-300" id="navbar">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3 cursor-pointer hover:text-primary transition-colors">
+                <div class="w-10 h-10 rounded-full overflow-hidden">
+                    <img src="https://www.woofswap.finance/image/tokens/gdog.png" alt="GDOG Logo" class="w-full h-full object-cover">
+                </div>
+                <span class="font-display text-3xl text-primary text-shadow-glow">GDOG社区</span>
+            </div>
+            <button id="menuToggle" class="md:hidden text-2xl text-primary">
+                <i class="fa fa-bars"></i>
+            </button>
+        </div>
+        <div id="mobileMenu" class="md:hidden bg-dark/95 absolute w-full top-full py-4 px-4 hidden">
+            <div class="flex flex-col space-y-4">
+                <a href="#community" class="hover:text-primary transition-colors py-2 text-white">社区</a>
+            </div>
+        </div>
+    </header>
+
+    <section id="community" class="min-h-screen pt-24 pb-16 bg-grid relative overflow-hidden flex items-center justify-center">
+        <div class="absolute inset-0 bg-gradient-to-b from-primary/10 to-dark pointer-events-none"></div>
+        <div class="absolute top-0 left-0 w-80 h-80 bg-primary/10 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-0 right-0 w-80 h-80 bg-secondary/10 rounded-full blur-3xl"></div>
+        <div class="container mx-auto px-4 text-center relative z-10">
+            <div class="w-48 h-48 mx-auto mb-8 animate-float">
+                <img src="https://www.woofswap.finance/image/tokens/gdog.png" alt="GDOG Logo" class="w-full h-full object-cover rounded-full border-4 border-secondary/50 glow-border">
+            </div>
+            <h1 class="font-display text-5xl md:text-7xl mb-6 text-primary text-shadow-glow">GDOG社区</h1>
+            <p class="text-xl md:text-2xl text-light-gray max-w-3xl mx-auto mb-10">
+                绑定你的Twitter和Telegram，参与GDOG社区投票！
+            </p>
+            <div class="bg-dark/50 p-6 rounded-lg border border-primary/30 max-w-md mx-auto mb-8">
+                <div class="flex flex-col space-y-4">
+                    <button id="connectWalletButton" class="px-6 py-3 bg-primary text-white rounded-full font-medium hover:bg-primary/80 transition-all">连接钱包</button>
+                    <p id="networkStatus" class="text-light-gray text-sm">点击连接钱包...</p>
+                    <div class="flex items-center bg-dark/80 p-3 rounded-lg border border-primary/20">
+                        <i class="fa fa-link text-accent mr-3"></i>
+                        <span class="font-mono text-sm text-white truncate">0xd12099CBdD60755bdDA0c9fa4f880D4c4CcDf679</span>
+                        <button class="ml-3 text-light-gray hover:text-secondary transition-colors" onclick="copyContract()">
+                            <i class="fa fa-copy"></i>
+                        </button>
+                    </div>
+                    <div class="bg-dark/80 p-3 rounded-lg border border-primary/20">
+                        <p id="balanceStatus" class="text-light-gray text-sm">GT余额: 0<br>GDOG余额: 0<br>锁仓GDOG: 0<br>用户ID: 0</p>
+                    </div>
+                    <div class="flex flex-col space-y-2">
+                        <label class="block text-left text-light-gray mb-2">Twitter地址</label>
+                        <input type="text" id="twitterInput" placeholder="输入Twitter链接（https://x.com/username）" class="px-4 py-2 bg-dark/80 border border-primary/20 rounded-lg text-white focus:outline-none focus:border-secondary">
+                        <label class="block text-left text-light-gray mb-2 mt-2">Telegram地址</label>
+                        <input type="text" id="telegramInput" placeholder="输入Telegram链接（https://t.me/username）" class="px-4 py-2 bg-dark/80 border border-primary/20 rounded-lg text-white focus:outline-none focus:border-secondary">
+                        <button id="bindButton" class="mt-2 px-6 py-3 bg-primary text-white rounded-full font-medium hover:bg-primary/80 transition-all disabled:bg-dark/50 disabled:cursor-not-allowed" disabled>绑定信息</button>
+                    </div>
+                    <div class="flex flex-col space-y-2">
+                        <label class="block text-left text-light-gray mb-2">投票候选人地址</label>
+                        <input type="text" id="voteAddress" placeholder="输入候选人钱包地址" class="px-4 py-2 bg-dark/80 border border-primary/20 rounded-lg text-white focus:outline-none focus:border-secondary">
+                        <button id="voteButton" class="mt-2 px-6 py-3 bg-primary text-white rounded-full font-medium hover:bg-primary/80 transition-all disabled:bg-dark/50 disabled:cursor-not-allowed" disabled>投票</button>
+                    </div>
+                    <div class="flex flex-col space-y-2">
+                        <label class="block text-left text-light-gray mb-2">查询（Twitter/Telegram/钱包地址）</label>
+                        <div class="flex items-center space-x-2">
+                            <input type="text" id="queryInput" placeholder="输入Twitter链接、Telegram链接或钱包地址" class="flex-1 px-4 py-2 bg-dark/80 border border-primary/20 rounded-lg text-white focus:outline-none focus:border-secondary">
+                            <button id="queryButton" class="px-4 py-2 bg-secondary text-dark rounded-lg font-medium hover:bg-secondary/80 transition-all">查询</button>
+                        </div>
+                        <div class="bg-dark/80 p-3 rounded-lg border border-primary/20 mt-2">
+                            <p id="queryStatus" class="text-light-gray text-sm">查询结果：请输入地址</p>
+                        </div>
+                    </div>
+                    <div class="flex flex-col space-y-2">
+                        <label class="block text-left text-light-gray mb-2">Top 200 投票用户</label>
+                        <div id="topVotedUsers" class="bg-dark/80 p-3 rounded-lg border border-primary/20 max-h-96 overflow-y-auto">
+                            <p class="text-light-gray text-sm">暂无投票数据</p>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <img src="https://www.woofswap.finance/image/tokens/gdog.png" alt="GDOG Logo" class="w-16 h-16 mx-auto animate-float">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-dark/95 py-12 border-t border-primary/20">
+        <div class="container mx-auto px-4 text-center">
+            <p class="text-light-gray text-sm">© 2025 GDOG社区。保留所有权利。请自行研究并谨慎投资。</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.7.0/dist/web3.min.js"></script>
+    <script>
+        const GDOG_ADDRESS = '0xf6D9Cf57e20bA0d33372E8998A9424aa53411E04';
+        const LOCK_CONTRACT_ADDRESS = '0xBF126783D39296197D0297f44ec984132a574FdA';
+        const CONTRACT_ADDRESS = '0xd12099CBdD60755bdDA0c9fa4f880D4c4CcDf679';
+        const MAX_APPROVAL = '115792089237316195423570985008687907853269984665640564039457584007913129639935';
+
+        const erc20Abi = [
+            {"constant":true,"inputs":[{"name":"_owner","type":"address"}],"name":"balanceOf","outputs":[{"name":"balance","type":"uint256"}],"stateMutability":"view","type":"function"},
+            {"constant":false,"inputs":[{"name":"_spender","type":"address"},{"name":"_value","type":"uint256"}],"name":"approve","outputs":[{"name":"success","type":"bool"}],"stateMutability":"nonpayable","type":"function"},
+            {"constant":false,"inputs":[{"name":"_from","type":"address"},{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transferFrom","outputs":[{"name":"success","type":"bool"}],"stateMutability":"nonpayable","type":"function"}
+        ];
+
+        const lockContractAbi = [
+            {"inputs":[{"internalType":"address","name":"user","type":"address"}],"name":"lockedBalances","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"}
+        ];
+
+        const contractAbi = [
+            {"inputs":[],"stateMutability":"nonpayable","type":"constructor"},
+            {"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"userId","type":"uint256"}],"name":"UserIdAssigned","type":"event"},
+            {"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"userId","type":"uint256"},{"indexed":false,"internalType":"string","name":"twitter","type":"string"},{"indexed":false,"internalType":"string","name":"telegram","type":"string"}],"name":"BindingSet","type":"event"},
+            {"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"voter","type":"address"},{"indexed":true,"internalType":"address","name":"candidate","type":"address"},{"indexed":false,"internalType":"uint256","name":"userId","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"timestamp","type":"uint256"}],"name":"Voted","type":"event"},
+            {"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},
+            {"inputs":[{"internalType":"string","name":"twitter","type":"string"},{"internalType":"string","name":"telegram","type":"string"}],"name":"bindInfo","outputs":[],"stateMutability":"nonpayable","type":"function"},
+            {"inputs":[{"internalType":"address","name":"candidate","type":"address"}],"name":"vote","outputs":[],"stateMutability":"nonpayable","type":"function"},
+            {"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},
+            {"inputs":[{"internalType":"uint256","name":"id","type":"uint256"}],"name":"getUserInfoById","outputs":[{"internalType":"address","name":"user","type":"address"},{"internalType":"uint256","name":"lockedBalance","type":"uint256"},{"internalType":"string","name":"twitter","type":"string"},{"internalType":"string","name":"telegram","type":"string"},{"internalType":"uint256","name":"voteCount","type":"uint256"},{"internalType":"uint256","name":"votesCast","type":"uint256"}],"stateMutability":"view","type":"function"},
+            {"inputs":[{"internalType":"address","name":"user","type":"address"}],"name":"getUserInfoByAddress","outputs":[{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"uint256","name":"lockedBalance","type":"uint256"},{"internalType":"string","name":"twitter","type":"string"},{"internalType":"string","name":"telegram","type":"string"},{"internalType":"uint256","name":"voteCount","type":"uint256"},{"internalType":"uint256","name":"votesCast","type":"uint256"}],"stateMutability":"view","type":"function"},
+            {"inputs":[{"internalType":"string","name":"twitter","type":"string"}],"name":"getUserInfoByTwitter","outputs":[{"internalType":"address","name":"user","type":"address"},{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"uint256","name":"lockedBalance","type":"uint256"},{"internalType":"string","name":"telegram","type":"string"},{"internalType":"uint256","name":"voteCount","type":"uint256"},{"internalType":"uint256","name":"votesCast","type":"uint256"}],"stateMutability":"view","type":"function"},
+            {"inputs":[{"internalType":"string","name":"telegram","type":"string"}],"name":"getUserInfoByTelegram","outputs":[{"internalType":"address","name":"user","type":"address"},{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"uint256","name":"lockedBalance","type":"uint256"},{"internalType":"string","name":"twitter","type":"string"},{"internalType":"uint256","name":"voteCount","type":"uint256"},{"internalType":"uint256","name":"votesCast","type":"uint256"}],"stateMutability":"view","type":"function"},
+            {"inputs":[],"name":"getTopVotedUsers","outputs":[{"internalType":"address[]","name":"users","type":"address[]"},{"internalType":"uint256[]","name":"ids","type":"uint256[]"},{"internalType":"uint256[]","name":"voteCounts","type":"uint256[]"}],"stateMutability":"view","type":"function"},
+            {"inputs":[{"internalType":"address","name":"user","type":"address"}],"name":"getUserId","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
+            {"inputs":[{"internalType":"uint256","name":"id","type":"uint256"}],"name":"getUserById","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},
+            {"inputs":[],"name":"GDOG","outputs":[{"internalType":"contract IERC20","name":"","type":"address"}],"stateMutability":"view","type":"function"},
+            {"inputs":[],"name":"lockContract","outputs":[{"internalType":"contract IGDOGLock","name":"","type":"address"}],"stateMutability":"view","type":"function"},
+            {"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},
+            {"inputs":[],"name":"nextUserId","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
+            {"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"userId","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
+            {"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"idToUser","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},
+            {"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"userInfo","outputs":[{"internalType":"string","name":"twitter","type":"string"},{"internalType":"string","name":"telegram","type":"string"},{"internalType":"uint256","name":"voteCount","type":"uint256"},{"internalType":"uint256","name":"votesCast","type":"uint256"}],"stateMutability":"view","type":"function"}
+        ];
+
+        const chains = {
+            GateLayer: {
+                chainId: 10088,
+                chainName: 'Gate Layer',
+                rpcUrl: 'https://gatelayer-rpc.gatenode.cc',
+                blockExplorer: 'https://www.gatescan.org/gatelayer/',
+                nativeCurrency: { name: 'GT', symbol: 'GT', decimals: 18 }
+            }
+        };
+
+        let web3, account, gdogContract, lockContract, communityContract;
+
+        async function waitForTransaction(txHash) {
+            let receipt = null;
+            const maxAttempts = 30;
+            let attempts = 0;
+            while (attempts < maxAttempts) {
+                receipt = await web3.eth.getTransactionReceipt(txHash);
+                if (receipt) {
+                    if (receipt.status) return receipt;
+                    throw new Error(`交易 ${txHash} 失败`);
+                }
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                attempts++;
+            }
+            throw new Error(`交易 ${txHash} 未在 ${maxAttempts} 次尝试后确认`);
+        }
+
+        async function delay(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        async function retryContractCall(fn, maxRetries = 3, delayMs = 500) {
+            for (let attempt = 1; attempt <= maxRetries; attempt++) {
+                try {
+                    return await fn();
+                } catch (error) {
+                    if (attempt === maxRetries) throw error;
+                    await delay(delayMs);
+                }
+            }
+        }
+
+        async function initializeWeb3() {
+            if (window.ethereum) {
+                web3 = new Web3(window.ethereum);
+                try {
+                    await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    account = (await web3.eth.getAccounts())[0];
+                    document.getElementById('connectWalletButton').innerText = `已连接: ${account.slice(0, 6)}...${account.slice(-4)}`;
+                    await switchNetwork('GateLayer');
+                    await initializeContracts();
+                    await checkBalances();
+                    await updateTopVotedUsers();
+                    document.getElementById('networkStatus').innerText = '已连接到Gate Layer (ID: 10088)';
+                } catch (error) {
+                    document.getElementById('networkStatus').innerText = '钱包连接失败: ' + (error.message || '未知错误');
+                }
+            } else {
+                document.getElementById('networkStatus').innerText = '请安装MetaMask';
+            }
+        }
+
+        async function switchNetwork(chain) {
+            const chainConfig = chains[chain];
+            try {
+                await window.ethereum.request({
+                    method: 'wallet_switchEthereumChain',
+                    params: [{ chainId: `0x${chainConfig.chainId.toString(16)}` }]
+                });
+            } catch (switchError) {
+                if (switchError.code === 4902) {
+                    await window.ethereum.request({
+                        method: 'wallet_addEthereumChain',
+                        params: [{
+                            chainId: `0x${chainConfig.chainId.toString(16)}`,
+                            chainName: chainConfig.chainName,
+                            rpcUrls: [chainConfig.rpcUrl],
+                            nativeCurrency: chainConfig.nativeCurrency,
+                            blockExplorerUrls: [chainConfig.blockExplorer]
+                        }]
+                    });
+                } else {
+                    throw switchError;
+                }
+            }
+        }
+
+        async function initializeContracts() {
+            gdogContract = new web3.eth.Contract(erc20Abi, GDOG_ADDRESS);
+            lockContract = new web3.eth.Contract(lockContractAbi, LOCK_CONTRACT_ADDRESS);
+            communityContract = new web3.eth.Contract(contractAbi, CONTRACT_ADDRESS);
+        }
+
+        async function checkBalances() {
+            if (!web3 || !account) {
+                document.getElementById('bindButton').disabled = true;
+                document.getElementById('voteButton').disabled = true;
+                document.getElementById('balanceStatus').innerHTML = 'GT余额: 0<br>GDOG余额: 0<br>锁仓GDOG: 0<br>用户ID: 0';
+                return;
+            }
+            try {
+                document.getElementById('networkStatus').innerText = '查询余额...';
+                const gtBalance = await retryContractCall(() => web3.eth.getBalance(account));
+                const gdogBalance = await retryContractCall(() => gdogContract.methods.balanceOf(account).call());
+                const lockedGdog = await retryContractCall(() => lockContract.methods.lockedBalances(account).call());
+                const userId = await retryContractCall(() => communityContract.methods.getUserId(account).call());
+                const gtBalanceFormatted = Number(web3.utils.fromWei(gtBalance, 'ether')).toFixed(4);
+                const gdogBalanceFormatted = Number(web3.utils.fromWei(gdogBalance, 'ether')).toFixed(4);
+                const lockedGdogFormatted = Number(web3.utils.fromWei(lockedGdog, 'ether')).toFixed(4);
+                document.getElementById('balanceStatus').innerHTML = `GT余额: ${gtBalanceFormatted}<br>GDOG余额: ${gdogBalanceFormatted}<br>锁仓GDOG: ${lockedGdogFormatted}<br>用户ID: ${userId}`;
+                document.getElementById('bindButton').disabled = Number(lockedGdogFormatted) < 100000;
+                document.getElementById('voteButton').disabled = Number(gdogBalanceFormatted) < 1;
+                document.getElementById('networkStatus').innerText = '余额已更新';
+            } catch (error) {
+                document.getElementById('networkStatus').innerText = `查询失败: ${error.message || '未知错误'}`;
+                document.getElementById('bindButton').disabled = true;
+                document.getElementById('voteButton').disabled = true;
+            }
+        }
+
+        async function bindInfo() {
+            const twitterInput = document.getElementById('twitterInput').value.trim();
+            const telegramInput = document.getElementById('telegramInput').value.trim();
+            const status = document.getElementById('networkStatus');
+            const bindButton = document.getElementById('bindButton');
+            if (!web3 || !account) {
+                status.innerText = '请连接钱包';
+                return;
+            }
+            if (!twitterInput.match(/^https:\/\/x\.com\/[A-Za-z0-9_]+$/)) {
+                status.innerText = '请输入有效的Twitter链接（https://x.com/username）';
+                return;
+            }
+            if (!telegramInput.match(/^https:\/\/t\.me\/[A-Za-z0-9_]+$/)) {
+                status.innerText = '请输入有效的Telegram链接（https://t.me/username）';
+                return;
+            }
+            try {
+                bindButton.disabled = true;
+                bindButton.innerHTML = '绑定中... <i class="fa fa-spinner fa-spin ml-2"></i>';
+                status.innerText = '检查锁仓余额和燃气费...';
+                const lockedGdog = await lockContract.methods.lockedBalances(account).call();
+                if (web3.utils.toBN(lockedGdog).lt(web3.utils.toBN('100000000000000000000000'))) {
+                    status.innerText = '锁仓GDOG不足100,000';
+                    return;
+                }
+                const gasPrice = await web3.eth.getGasPrice();
+                const estimatedGas = await communityContract.methods.bindInfo(twitterInput, telegramInput).estimateGas({ from: account });
+                const nativeBalance = await web3.eth.getBalance(account);
+                const gasCost = web3.utils.toBN(gasPrice).mul(web3.utils.toBN(estimatedGas));
+                if (web3.utils.toBN(nativeBalance).lt(gasCost)) {
+                    status.innerText = 'GT余额不足以支付燃气费';
+                    return;
+                }
+                const tx = await communityContract.methods.bindInfo(twitterInput, telegramInput).send({
+                    from: account,
+                    gas: web3.utils.toHex(Math.min(estimatedGas * 2, 3000000))
+                });
+                await waitForTransaction(tx.transactionHash);
+                status.innerText = '绑定成功！';
+                document.getElementById('twitterInput').value = '';
+                document.getElementById('telegramInput').value = '';
+                await checkBalances();
+            } catch (error) {
+                status.innerText = error.code === 4001 ? '用户取消交易' : `绑定失败: ${error.message}`;
+            } finally {
+                bindButton.disabled = false;
+                bindButton.innerHTML = '绑定信息';
+            }
+        }
+
+        async function vote() {
+            const candidateAddress = document.getElementById('voteAddress').value.trim();
+            const status = document.getElementById('networkStatus');
+            const voteButton = document.getElementById('voteButton');
+            if (!web3 || !account) {
+                status.innerText = '请连接钱包';
+                return;
+            }
+            if (!web3.utils.isAddress(candidateAddress)) {
+                status.innerText = '请输入有效的候选人钱包地址';
+                return;
+            }
+            try {
+                voteButton.disabled = true;
+                voteButton.innerHTML = '投票中... <i class="fa fa-spinner fa-spin ml-2"></i>';
+                status.innerText = '检查GDOG余额和燃气费...';
+                const gdogBalance = await gdogContract.methods.balanceOf(account).call();
+                if (web3.utils.toBN(gdogBalance).lt(web3.utils.toBN('1000000000000000000'))) {
+                    status.innerText = 'GDOG余额不足1';
+                    return;
+                }
+                const allowance = await gdogContract.methods.allowance(account, CONTRACT_ADDRESS).call();
+                if (web3.utils.toBN(allowance).lt(web3.utils.toBN('1000000000000000000'))) {
+                    status.innerText = '授权GDOG...';
+                    const gasPriceApprove = await web3.eth.getGasPrice();
+                    const estimatedGasApprove = await gdogContract.methods.approve(CONTRACT_ADDRESS, MAX_APPROVAL).estimateGas({ from: account });
+                    const nativeBalanceApprove = await web3.eth.getBalance(account);
+                    const gasCostApprove = web3.utils.toBN(gasPriceApprove).mul(web3.utils.toBN(estimatedGasApprove));
+                    if (web3.utils.toBN(nativeBalanceApprove).lt(gasCostApprove)) {
+                        status.innerText = 'GT余额不足以支付授权燃气费';
+                        return;
+                    }
+                    const approveTx = await gdogContract.methods.approve(CONTRACT_ADDRESS, MAX_APPROVAL).send({
+                        from: account,
+                        gas: web3.utils.toHex(Math.min(estimatedGasApprove * 2, 1000000))
+                    });
+                    await waitForTransaction(approveTx.transactionHash);
+                }
+                const gasPrice = await web3.eth.getGasPrice();
+                const estimatedGas = await communityContract.methods.vote(candidateAddress).estimateGas({ from: account });
+                const nativeBalance = await web3.eth.getBalance(account);
+                const gasCost = web3.utils.toBN(gasPrice).mul(web3.utils.toBN(estimatedGas));
+                if (web3.utils.toBN(nativeBalance).lt(gasCost)) {
+                    status.innerText = 'GT余额不足以支付燃气费';
+                    return;
+                }
+                const tx = await communityContract.methods.vote(candidateAddress).send({
+                    from: account,
+                    gas: web3.utils.toHex(Math.min(estimatedGas * 2, 3000000))
+                });
+                await waitForTransaction(tx.transactionHash);
+                status.innerText = '投票成功！';
+                document.getElementById('voteAddress').value = '';
+                await checkBalances();
+                await updateTopVotedUsers();
+            } catch (error) {
+                status.innerText = error.code === 4001 ? '用户取消交易' : `投票失败: ${error.message}`;
+            } finally {
+                voteButton.disabled = false;
+                voteButton.innerHTML = '投票';
+            }
+        }
+
+        async function queryInfo() {
+            const queryInput = document.getElementById('queryInput').value.trim();
+            const queryStatus = document.getElementById('queryStatus');
+            if (!web3) {
+                queryStatus.innerText = '请连接钱包';
+                return;
+            }
+            try {
+                queryStatus.innerText = '查询中...';
+                let result;
+                if (web3.utils.isAddress(queryInput)) {
+                    result = await retryContractCall(() => communityContract.methods.getUserInfoByAddress(queryInput).call());
+                    const [id, lockedBalance, twitter, telegram, voteCount, votesCast] = result;
+                    const lockedBalanceFormatted = Number(web3.utils.fromWei(lockedBalance, 'ether')).toFixed(4);
+                    queryStatus.innerHTML = `地址: ${queryInput.slice(0, 6)}...${queryInput.slice(-4)}<br>用户ID: ${id}<br>锁仓GDOG: ${lockedBalanceFormatted}<br>Twitter: <a href="${twitter}" target="_blank" class="text-primary hover:underline">${twitter}</a><br>Telegram: <a href="${telegram}" target="_blank" class="text-primary hover:underline">${telegram}</a><br>获得票数: ${voteCount}<br>投出票数: ${votesCast}`;
+                } else if (queryInput.match(/^https:\/\/x\.com\/[A-Za-z0-9_]+$/)) {
+                    result = await retryContractCall(() => communityContract.methods.getUserInfoByTwitter(queryInput).call());
+                    const [user, id, lockedBalance, telegram, voteCount, votesCast] = result;
+                    const lockedBalanceFormatted = Number(web3.utils.fromWei(lockedBalance, 'ether')).toFixed(4);
+                    queryStatus.innerHTML = `地址: ${user.slice(0, 6)}...${user.slice(-4)}<br>用户ID: ${id}<br>锁仓GDOG: ${lockedBalanceFormatted}<br>Twitter: <a href="${queryInput}" target="_blank" class="text-primary hover:underline">${queryInput}</a><br>Telegram: <a href="${telegram}" target="_blank" class="text-primary hover:underline">${telegram}</a><br>获得票数: ${voteCount}<br>投出票数: ${votesCast}`;
+                } else if (queryInput.match(/^https:\/\/t\.me\/[A-Za-z0-9_]+$/)) {
+                    result = await retryContractCall(() => communityContract.methods.getUserInfoByTelegram(queryInput).call());
+                    const [user, id, lockedBalance, twitter, voteCount, votesCast] = result;
+                    const lockedBalanceFormatted = Number(web3.utils.fromWei(lockedBalance, 'ether')).toFixed(4);
+                    queryStatus.innerHTML = `地址: ${user.slice(0, 6)}...${user.slice(-4)}<br>用户ID: ${id}<br>锁仓GDOG: ${lockedBalanceFormatted}<br>Twitter: <a href="${twitter}" target="_blank" class="text-primary hover:underline">${twitter}</a><br>Telegram: <a href="${queryInput}" target="_blank" class="text-primary hover:underline">${queryInput}</a><br>获得票数: ${voteCount}<br>投出票数: ${votesCast}`;
+                } else {
+                    queryStatus.innerText = '请输入有效的Twitter链接、Telegram链接或钱包地址';
+                    return;
+                }
+            } catch (error) {
+                queryStatus.innerText = `查询失败: ${error.message || '未知错误'}`;
+            }
+        }
+
+        async function updateTopVotedUsers() {
+            const topVotedUsersDiv = document.getElementById('topVotedUsers');
+            if (!web3) {
+                topVotedUsersDiv.innerHTML = '<p class="text-light-gray text-sm">请连接钱包</p>';
+                return;
+            }
+            try {
+                const result = await retryContractCall(() => communityContract.methods.getTopVotedUsers().call());
+                const [users, ids, voteCounts] = result;
+                if (users.length === 0) {
+                    topVotedUsersDiv.innerHTML = '<p class="text-light-gray text-sm">暂无投票数据</p>';
+                    return;
+                }
+                let html = '<table class="w-full text-left text-sm"><thead><tr><th>地址</th><th>ID</th><th>Twitter</th><th>Telegram</th><th>票数</th></tr></thead><tbody>';
+                for (let i = 0; i < users.length; i++) {
+                    const userInfo = await retryContractCall(() => communityContract.methods.getUserInfoByAddress(users[i]).call());
+                    const twitter = userInfo[2];
+                    const telegram = userInfo[3];
+                    html += `<tr><td>${users[i].slice(0, 6)}...${users[i].slice(-4)}</td><td>${ids[i]}</td><td><a href="${twitter}" target="_blank" class="text-primary hover:underline">${twitter.slice(0, 20)}${twitter.length > 20 ? '...' : ''}</a></td><td><a href="${telegram}" target="_blank" class="text-primary hover:underline">${telegram.slice(0, 20)}${telegram.length > 20 ? '...' : ''}</a></td><td>${voteCounts[i]}</td></tr>`;
+                }
+                html += '</tbody></table>';
+                topVotedUsersDiv.innerHTML = html;
+            } catch (error) {
+                topVotedUsersDiv.innerHTML = `<p class="text-light-gray text-sm">查询失败: ${error.message || '未知错误'}</p>`;
+            }
+        }
+
+        function copyContract() {
+            navigator.clipboard.writeText(CONTRACT_ADDRESS).then(() => {
+                const notification = document.createElement('div');
+                notification.className = 'fixed bottom-4 right-4 bg-primary text-white px-4 py-2 rounded-lg shadow-lg z-50';
+                notification.textContent = '合约地址已复制！';
+                document.body.appendChild(notification);
+                setTimeout(() => {
+                    notification.style.opacity = '0';
+                    notification.style.transition = 'opacity 0.3s';
+                    setTimeout(() => {
+                        document.body.removeChild(notification);
+                    }, 300);
+                }, 2000);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('connectWalletButton').addEventListener('click', initializeWeb3);
+            document.getElementById('bindButton').addEventListener('click', bindInfo);
+            document.getElementById('voteButton').addEventListener('click', vote);
+            document.getElementById('queryButton').addEventListener('click', queryInfo);
+            document.getElementById('twitterInput').addEventListener('input', () => {
+                const twitter = document.getElementById('twitterInput').value.trim();
+                const telegram = document.getElementById('telegramInput').value.trim();
+                document.getElementById('bindButton').disabled = !twitter.match(/^https:\/\/x\.com\/[A-Za-z0-9_]+$/) || !telegram.match(/^https:\/\/t\.me\/[A-Za-z0-9_]+$/);
+            });
+            document.getElementById('telegramInput').addEventListener('input', () => {
+                const twitter = document.getElementById('twitterInput').value.trim();
+                const telegram = document.getElementById('telegramInput').value.trim();
+                document.getElementById('bindButton').disabled = !twitter.match(/^https:\/\/x\.com\/[A-Za-z0-9_]+$/) || !telegram.match(/^https:\/\/t\.me\/[A-Za-z0-9_]+$/);
+            });
+            document.getElementById('voteAddress').addEventListener('input', () => {
+                const candidateAddress = document.getElementById('voteAddress').value.trim();
+                document.getElementById('voteButton').disabled = !web3.utils.isAddress(candidateAddress);
+            });
+
+            const menuToggle = document.getElementById('menuToggle');
+            const mobileMenu = document.getElementById('mobileMenu');
+            menuToggle.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+                menuToggle.innerHTML = mobileMenu.classList.contains('hidden')
+                    ? '<i class="fa fa-bars"></i>'
+                    : '<i class="fa fa-times"></i>';
+            });
+
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    mobileMenu.classList.add('hidden');
+                    menuToggle.innerHTML = '<i class="fa fa-bars"></i>';
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+
+            const navbar = document.getElementById('navbar');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 50) {
+                    navbar.classList.add('bg-dark/95', 'shadow-lg');
+                } else {
+                    navbar.classList.remove('bg-dark/95', 'shadow-lg');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
