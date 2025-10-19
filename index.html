@@ -217,7 +217,7 @@
             return new Promise(resolve => setTimeout(resolve, ms));
         }
 
-        async function retryContractCall(fn, maxRetries = 10, delayMs = 3000) {
+        async function retryContractCall(fn, maxRetries = 12, delayMs = 3000) {
             for (let attempt = 1; attempt <= maxRetries; attempt++) {
                 try {
                     return await Promise.race([
@@ -447,12 +447,12 @@
                 queryStatus.innerText = '查询中...';
                 console.log('查询输入:', queryInput);
                 let result;
-                if (web3.utils.isAddress(queryInput)) {
+                if (queryInput.startsWith('0x') && web3.utils.isAddress(queryInput)) {
                     result = await retryContractCall(() => communityContract.methods.getUserInfoByAddress(queryInput).call());
                     const [id, lockedBalance, twitter, telegram, voteCount, votesCast] = result;
                     const lockedBalanceFormatted = Number(web3.utils.fromWei(lockedBalance, 'ether')).toFixed(4);
                     queryStatus.innerHTML = `地址: ${queryInput.slice(0, 6)}...${queryInput.slice(-4)}<br>用户ID: ${id}<br>锁仓GDOG: ${lockedBalanceFormatted}<br>Twitter: <a href="${twitter || '#'}" target="_blank" class="text-primary hover:underline">${twitter || '未绑定'}</a><br>Telegram: <a href="${telegram || '#'}" target="_blank" class="text-primary hover:underline">${telegram || '未绑定'}</a><br>获得票数: ${voteCount}<br>投出票数: ${votesCast}`;
-                } else if (queryInput.startsWith('https://x.com/')) {
+                } else if (queryInput.includes('https://x.com/')) {
                     try {
                         result = await retryContractCall(() => communityContract.methods.getUserInfoByTwitter(queryInput).call());
                         const [user, id, lockedBalance, telegram, voteCount, votesCast] = result;
@@ -460,13 +460,13 @@
                         queryStatus.innerHTML = `地址: ${user.slice(0, 6)}...${user.slice(-4)}<br>用户ID: ${id}<br>锁仓GDOG: ${lockedBalanceFormatted}<br>Twitter: <a href="${queryInput}" target="_blank" class="text-primary hover:underline">${queryInput}</a><br>Telegram: <a href="${telegram || '#'}" target="_blank" class="text-primary hover:underline">${telegram || '未绑定'}</a><br>获得票数: ${voteCount}<br>投出票数: ${votesCast}`;
                     } catch (error) {
                         if (error.message.includes("Twitter not found")) {
-                            queryStatus.innerText = '未找到匹配的Twitter地址，请确认输入';
-                            console.log('未找到Twitter:', queryInput);
+                            queryStatus.innerText = '未找到匹配的Twitter地址，请确认输入与绑定时一致';
+                            console.log('Twitter查询失败，输入:', queryInput);
                         } else {
                             throw error;
                         }
                     }
-                } else if (queryInput.startsWith('https://t.me/')) {
+                } else if (queryInput.includes('https://t.me/')) {
                     try {
                         result = await retryContractCall(() => communityContract.methods.getUserInfoByTelegram(queryInput).call());
                         const [user, id, lockedBalance, twitter, voteCount, votesCast] = result;
@@ -474,14 +474,14 @@
                         queryStatus.innerHTML = `地址: ${user.slice(0, 6)}...${user.slice(-4)}<br>用户ID: ${id}<br>锁仓GDOG: ${lockedBalanceFormatted}<br>Twitter: <a href="${twitter || '#'}" target="_blank" class="text-primary hover:underline">${twitter || '未绑定'}</a><br>Telegram: <a href="${queryInput}" target="_blank" class="text-primary hover:underline">${queryInput}</a><br>获得票数: ${voteCount}<br>投出票数: ${votesCast}`;
                     } catch (error) {
                         if (error.message.includes("Telegram not found")) {
-                            queryStatus.innerText = '未找到匹配的Telegram地址，请确认输入';
-                            console.log('未找到Telegram:', queryInput);
+                            queryStatus.innerText = '未找到匹配的Telegram地址，请确认输入与绑定时一致';
+                            console.log('Telegram查询失败，输入:', queryInput);
                         } else {
                             throw error;
                         }
                     }
                 } else {
-                    queryStatus.innerText = '请输入有效的Twitter链接（https://x.com/...）、Telegram链接（https://t.me/...）或钱包地址';
+                    queryStatus.innerText = '请输入以0x开头的钱包地址、https://x.com/开头的Twitter链接或https://t.me/开头的Telegram链接';
                     return;
                 }
             } catch (error) {
