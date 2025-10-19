@@ -46,6 +46,18 @@
             background-image: url('data:image/svg+xml,%3Csvg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"%3E%3Ccircle cx="1" cy="1" r="1" fill="%230068FF" fill-opacity="0.1"/%3E%3C/svg%3E');
             background-size: 20px 20px;
         }
+        .top-users-table th, .top-users-table td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid rgba(24, 229, 160, 0.2);
+            vertical-align: middle;
+        }
+        .top-users-table tr:hover {
+            background-color: rgba(24, 229, 160, 0.1);
+        }
+        .top-users-table a {
+            word-break: break-all;
+        }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&family=Changa+One&display=swap" rel="stylesheet">
 </head>
@@ -299,7 +311,7 @@
                 const contractBalance = await retryContractCall(() => gdogContract.methods.balanceOf(CONTRACT_ADDRESS).call());
                 const gtBalanceFormatted = Number(web3.utils.fromWei(gtBalance, 'ether')).toFixed(4);
                 const gdogBalanceFormatted = Number(web3.utils.fromWei(gdogBalance, 'ether')).toFixed(4);
-                const lockedGdogFormatted = Number(web3.utils.fromWei(lockedGdog, 'ether')).toFixed(4);
+                const lockedGdogFormatted = Number(web3.utils.fromWei(lockedGdog, 'ether')). бе
                 const contractBalanceFormatted = Number(web3.utils.fromWei(contractBalance, 'ether')).toFixed(4);
                 document.getElementById('balanceStatus').innerHTML = `GT余额: ${gtBalanceFormatted}<br>GDOG余额: ${gdogBalanceFormatted}<br>锁仓GDOG: ${lockedGdogFormatted}<br>用户ID: ${userId}<br>合约GDOG余额: ${contractBalanceFormatted}`;
                 document.getElementById('bindButton').disabled = Number(lockedGdogFormatted) < 100000;
@@ -449,15 +461,13 @@
                 let result;
                 if (queryInput.startsWith('0x') && web3.utils.isAddress(queryInput)) {
                     result = await retryContractCall(() => communityContract.methods.getUserInfoByAddress(queryInput).call());
-                    const [id, lockedBalance, twitter, telegram, voteCount, votesCast] = result;
-                    const lockedBalanceFormatted = Number(web3.utils.fromWei(lockedBalance, 'ether')).toFixed(4);
-                    queryStatus.innerHTML = `地址: ${queryInput.slice(0, 6)}...${queryInput.slice(-4)}<br>用户ID: ${id}<br>锁仓GDOG: ${lockedBalanceFormatted}<br>Twitter: <a href="${twitter || '#'}" target="_blank" class="text-primary hover:underline">${twitter || '未绑定'}</a><br>Telegram: <a href="${telegram || '#'}" target="_blank" class="text-primary hover:underline">${telegram || '未绑定'}</a><br>获得票数: ${voteCount}<br>投出票数: ${votesCast}`;
+                    const lockedBalanceFormatted = Number(web3.utils.fromWei(result.lockedBalance, 'ether')).toFixed(4);
+                    queryStatus.innerHTML = `地址: ${queryInput.slice(0, 6)}...${queryInput.slice(-4)}<br>用户ID: ${result.id}<br>锁仓GDOG: ${lockedBalanceFormatted}<br>Twitter: <a href="${result.twitter || '#'}" target="_blank" class="text-primary hover:underline">${result.twitter || '未绑定'}</a><br>Telegram: <a href="${result.telegram || '#'}" target="_blank" class="text-primary hover:underline">${result.telegram || '未绑定'}</a><br>获得票数: ${result.voteCount}<br>投出票数: ${result.votesCast}`;
                 } else if (queryInput.includes('https://x.com/')) {
                     try {
                         result = await retryContractCall(() => communityContract.methods.getUserInfoByTwitter(queryInput).call());
-                        const [user, id, lockedBalance, telegram, voteCount, votesCast] = result;
-                        const lockedBalanceFormatted = Number(web3.utils.fromWei(lockedBalance, 'ether')).toFixed(4);
-                        queryStatus.innerHTML = `地址: ${user.slice(0, 6)}...${user.slice(-4)}<br>用户ID: ${id}<br>锁仓GDOG: ${lockedBalanceFormatted}<br>Twitter: <a href="${queryInput}" target="_blank" class="text-primary hover:underline">${queryInput}</a><br>Telegram: <a href="${telegram || '#'}" target="_blank" class="text-primary hover:underline">${telegram || '未绑定'}</a><br>获得票数: ${voteCount}<br>投出票数: ${votesCast}`;
+                        const lockedBalanceFormatted = Number(web3.utils.fromWei(result.lockedBalance, 'ether')).toFixed(4);
+                        queryStatus.innerHTML = `地址: ${result.user.slice(0, 6)}...${result.user.slice(-4)}<br>用户ID: ${result.id}<br>锁仓GDOG: ${lockedBalanceFormatted}<br>Twitter: <a href="${queryInput}" target="_blank" class="text-primary hover:underline">${queryInput}</a><br>Telegram: <a href="${result.telegram || '#'}" target="_blank" class="text-primary hover:underline">${result.telegram || '未绑定'}</a><br>获得票数: ${result.voteCount}<br>投出票数: ${result.votesCast}`;
                     } catch (error) {
                         if (error.message.includes("Twitter not found")) {
                             queryStatus.innerText = '未找到匹配的Twitter地址，请确认输入与绑定时一致';
@@ -469,9 +479,8 @@
                 } else if (queryInput.includes('https://t.me/')) {
                     try {
                         result = await retryContractCall(() => communityContract.methods.getUserInfoByTelegram(queryInput).call());
-                        const [user, id, lockedBalance, twitter, voteCount, votesCast] = result;
-                        const lockedBalanceFormatted = Number(web3.utils.fromWei(lockedBalance, 'ether')).toFixed(4);
-                        queryStatus.innerHTML = `地址: ${user.slice(0, 6)}...${user.slice(-4)}<br>用户ID: ${id}<br>锁仓GDOG: ${lockedBalanceFormatted}<br>Twitter: <a href="${twitter || '#'}" target="_blank" class="text-primary hover:underline">${twitter || '未绑定'}</a><br>Telegram: <a href="${queryInput}" target="_blank" class="text-primary hover:underline">${queryInput}</a><br>获得票数: ${voteCount}<br>投出票数: ${votesCast}`;
+                        const lockedBalanceFormatted = Number(web3.utils.fromWei(result.lockedBalance, 'ether')).toFixed(4);
+                        queryStatus.innerHTML = `地址: ${result.user.slice(0, 6)}...${result.user.slice(-4)}<br>用户ID: ${result.id}<br>锁仓GDOG: ${lockedBalanceFormatted}<br>Twitter: <a href="${result.twitter || '#'}" target="_blank" class="text-primary hover:underline">${result.twitter || '未绑定'}</a><br>Telegram: <a href="${queryInput}" target="_blank" class="text-primary hover:underline">${queryInput}</a><br>获得票数: ${result.voteCount}<br>投出票数: ${result.votesCast}`;
                     } catch (error) {
                         if (error.message.includes("Telegram not found")) {
                             queryStatus.innerText = '未找到匹配的Telegram地址，请确认输入与绑定时一致';
@@ -533,18 +542,18 @@
                     }
                 }
                 users = users.slice(0, maxUsers);
-                ids = ids.slice(0, maxUsers);
+                ids = users.slice(0, maxUsers);
                 voteCounts = voteCounts.slice(0, maxUsers);
                 if (users.length === 0) {
                     topVotedUsersDiv.innerHTML = '<p class="text-light-gray text-sm">暂无投票数据</p>';
                     return;
                 }
-                let html = '<table class="w-full text-left text-sm"><thead><tr><th>地址</th><th>ID</th><th>Twitter</th><th>Telegram</th><th>票数</th></tr></thead><tbody>';
+                let html = '<table class="w-full text-sm top-users-table"><thead><tr><th class="w-1/6">地址</th><th class="w-1/12">ID</th><th>Twitter</th><th>Telegram</th><th class="w-1/12">票数</th></tr></thead><tbody>';
                 for (let i = 0; i < users.length; i++) {
                     const userInfo = await retryContractCall(() => communityContract.methods.getUserInfoByAddress(users[i]).call());
-                    const twitter = userInfo[2] || '未绑定';
-                    const telegram = userInfo[3] || '未绑定';
-                    html += `<tr><td>${users[i].slice(0, 6)}...${users[i].slice(-4)}</td><td>${ids[i]}</td><td><a href="${twitter}" target="_blank" class="text-primary hover:underline">${twitter.slice(0, 20)}${twitter.length > 20 ? '...' : ''}</a></td><td><a href="${telegram}" target="_blank" class="text-primary hover:underline">${telegram.slice(0, 20)}${telegram.length > 20 ? '...' : ''}</a></td><td>${voteCounts[i]}</td></tr>`;
+                    const twitter = userInfo.twitter || '未绑定';
+                    const telegram = userInfo.telegram || '未绑定';
+                    html += `<tr><td class="w-1/6"><span class="font-mono">${users[i].slice(0, 6)}...${users[i].slice(-4)}</span><button class="ml-2 text-light-gray hover:text-secondary" onclick="navigator.clipboard.writeText('${users[i]}').then(() => alert('地址已复制'))"><i class="fa fa-copy"></i></button></td><td class="w-1/12">${ids[i]}</td><td><a href="${twitter}" target="_blank" class="text-primary hover:underline">${twitter}</a></td><td><a href="${telegram}" target="_blank" class="text-primary hover:underline">${telegram}</a></td><td class="w-1/12">${voteCounts[i]}</td></tr>`;
                 }
                 html += '</tbody></table>';
                 topVotedUsersDiv.innerHTML = html;
