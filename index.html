@@ -311,7 +311,7 @@
                 const contractBalance = await retryContractCall(() => gdogContract.methods.balanceOf(CONTRACT_ADDRESS).call());
                 const gtBalanceFormatted = Number(web3.utils.fromWei(gtBalance, 'ether')).toFixed(4);
                 const gdogBalanceFormatted = Number(web3.utils.fromWei(gdogBalance, 'ether')).toFixed(4);
-                const lockedGdogFormatted = Number(web3.utils.fromWei(lockedGdog, 'ether')). бе
+                const lockedGdogFormatted = Number(web3.utils.fromWei(lockedGdog, 'ether')).toFixed(4);
                 const contractBalanceFormatted = Number(web3.utils.fromWei(contractBalance, 'ether')).toFixed(4);
                 document.getElementById('balanceStatus').innerHTML = `GT余额: ${gtBalanceFormatted}<br>GDOG余额: ${gdogBalanceFormatted}<br>锁仓GDOG: ${lockedGdogFormatted}<br>用户ID: ${userId}<br>合约GDOG余额: ${contractBalanceFormatted}`;
                 document.getElementById('bindButton').disabled = Number(lockedGdogFormatted) < 100000;
