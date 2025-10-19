@@ -81,7 +81,7 @@
             </div>
             <h1 class="font-display text-5xl md:text-7xl mb-6 text-primary text-shadow-glow">GDOG社区</h1>
             <p class="text-xl md:text-2xl text-light-gray max-w-3xl mx-auto mb-10">
-                绑定你的Twitter和Telegram，参与GDOG社区投票！
+                绑定你的Twitter和Telegram，参与GDOG社区投票！（30% GDOG存入合约，70%转给候选人）
             </p>
             <div class="bg-dark/50 p-6 rounded-lg border border-primary/30 max-w-md mx-auto mb-8">
                 <div class="flex flex-col space-y-4">
@@ -89,13 +89,13 @@
                     <p id="networkStatus" class="text-light-gray text-sm">点击连接钱包...</p>
                     <div class="flex items-center bg-dark/80 p-3 rounded-lg border border-primary/20">
                         <i class="fa fa-link text-accent mr-3"></i>
-                        <span class="font-mono text-sm text-white truncate">0x3f20bE2c2cc9daaE5bf63E4edFD3057aaf90Bd9c</span>
+                        <span class="font-mono text-sm text-white truncate">0xCB979F415645369820E1d8ec36B7C7E86ea1a7Ec</span>
                         <button class="ml-3 text-light-gray hover:text-secondary transition-colors" onclick="copyContract()">
                             <i class="fa fa-copy"></i>
                         </button>
                     </div>
                     <div class="bg-dark/80 p-3 rounded-lg border border-primary/20">
-                        <p id="balanceStatus" class="text-light-gray text-sm">GT余额: 0<br>GDOG余额: 0<br>锁仓GDOG: 0<br>用户ID: 0</p>
+                        <p id="balanceStatus" class="text-light-gray text-sm">GT余额: 0<br>GDOG余额: 0<br>锁仓GDOG: 0<br>用户ID: 0<br>合约GDOG余额: 0</p>
                     </div>
                     <div class="flex flex-col space-y-2">
                         <label class="block text-left text-light-gray mb-2">Twitter地址</label>
@@ -107,8 +107,8 @@
                     <div class="flex flex-col space-y-2">
                         <label class="block text-left text-light-gray mb-2">投票候选人地址</label>
                         <input type="text" id="voteAddress" placeholder="输入候选人钱包地址" class="px-4 py-2 bg-dark/80 border border-primary/20 rounded-lg text-white focus:outline-none focus:border-secondary">
-                        <label class="block text-left text-light-gray mb-2 mt-2">投票数量（GDOG）</label>
-                        <input type="text" id="voteAmount" placeholder="输入投票GDOG数量" class="px-4 py-2 bg-dark/80 border border-primary/20 rounded-lg text-white focus:outline-none focus:border-secondary">
+                        <label class="block text-left text-light-gray mb-2 mt-2">投票数量（GDOG，需为整数）</label>
+                        <input type="text" id="voteAmount" placeholder="输入投票GDOG数量（例如 1, 2, 3）" class="px-4 py-2 bg-dark/80 border border-primary/20 rounded-lg text-white focus:outline-none focus:border-secondary">
                         <button id="voteButton" class="mt-2 px-6 py-3 bg-primary text-white rounded-full font-medium hover:bg-primary/80 transition-all disabled:bg-dark/50 disabled:cursor-not-allowed" disabled>投票</button>
                     </div>
                     <div class="flex flex-col space-y-2">
@@ -145,7 +145,7 @@
     <script>
         const GDOG_ADDRESS = '0xf6D9Cf57e20bA0d33372E8998A9424aa53411E04';
         const LOCK_CONTRACT_ADDRESS = '0xBF126783D39296197D0297f44ec984132a574FdA';
-        const CONTRACT_ADDRESS = '0x3f20bE2c2cc9daaE5bf63E4edFD3057aaf90Bd9c';
+        const CONTRACT_ADDRESS = '0xCB979F415645369820E1d8ec36B7C7E86ea1a7Ec';
         const MIN_LOCK_FOR_BINDING = '100000000000000000000000'; // 100,000 GDOG
         const MAX_APPROVAL = '115792089237316195423570985008687907853269984665640564039457584007913129639935';
 
@@ -165,9 +165,11 @@
             {"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"userId","type":"uint256"}],"name":"UserIdAssigned","type":"event"},
             {"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"userId","type":"uint256"},{"indexed":false,"internalType":"string","name":"twitter","type":"string"},{"indexed":false,"internalType":"string","name":"telegram","type":"string"}],"name":"BindingSet","type":"event"},
             {"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"voter","type":"address"},{"indexed":true,"internalType":"address","name":"candidate","type":"address"},{"indexed":false,"internalType":"uint256","name":"userId","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"timestamp","type":"uint256"}],"name":"Voted","type":"event"},
+            {"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"Withdrawn","type":"event"},
             {"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},
             {"inputs":[{"internalType":"string","name":"twitter","type":"string"},{"internalType":"string","name":"telegram","type":"string"}],"name":"bindInfo","outputs":[],"stateMutability":"nonpayable","type":"function"},
             {"inputs":[{"internalType":"address","name":"candidate","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"vote","outputs":[],"stateMutability":"nonpayable","type":"function"},
+            {"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"withdrawGDOG","outputs":[],"stateMutability":"nonpayable","type":"function"},
             {"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},
             {"inputs":[{"internalType":"uint256","name":"id","type":"uint256"}],"name":"getUserInfoById","outputs":[{"internalType":"address","name":"user","type":"address"},{"internalType":"uint256","name":"lockedBalance","type":"uint256"},{"internalType":"string","name":"twitter","type":"string"},{"internalType":"string","name":"telegram","type":"string"},{"internalType":"uint256","name":"voteCount","type":"uint256"},{"internalType":"uint256","name":"votesCast","type":"uint256"}],"stateMutability":"view","type":"function"},
             {"inputs":[{"internalType":"address","name":"user","type":"address"}],"name":"getUserInfoByAddress","outputs":[{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"uint256","name":"lockedBalance","type":"uint256"},{"internalType":"string","name":"twitter","type":"string"},{"internalType":"string","name":"telegram","type":"string"},{"internalType":"uint256","name":"voteCount","type":"uint256"},{"internalType":"uint256","name":"votesCast","type":"uint256"}],"stateMutability":"view","type":"function"},
@@ -283,7 +285,7 @@
             if (!web3 || !account) {
                 document.getElementById('bindButton').disabled = true;
                 document.getElementById('voteButton').disabled = true;
-                document.getElementById('balanceStatus').innerHTML = 'GT余额: 0<br>GDOG余额: 0<br>锁仓GDOG: 0<br>用户ID: 0';
+                document.getElementById('balanceStatus').innerHTML = 'GT余额: 0<br>GDOG余额: 0<br>锁仓GDOG: 0<br>用户ID: 0<br>合约GDOG余额: 0';
                 return;
             }
             try {
@@ -292,10 +294,12 @@
                 const gdogBalance = await retryContractCall(() => gdogContract.methods.balanceOf(account).call());
                 const lockedGdog = await retryContractCall(() => lockContract.methods.lockedBalances(account).call());
                 const userId = await retryContractCall(() => communityContract.methods.getUserId(account).call());
+                const contractBalance = await retryContractCall(() => gdogContract.methods.balanceOf(CONTRACT_ADDRESS).call());
                 const gtBalanceFormatted = Number(web3.utils.fromWei(gtBalance, 'ether')).toFixed(4);
                 const gdogBalanceFormatted = Number(web3.utils.fromWei(gdogBalance, 'ether')).toFixed(4);
                 const lockedGdogFormatted = Number(web3.utils.fromWei(lockedGdog, 'ether')).toFixed(4);
-                document.getElementById('balanceStatus').innerHTML = `GT余额: ${gtBalanceFormatted}<br>GDOG余额: ${gdogBalanceFormatted}<br>锁仓GDOG: ${lockedGdogFormatted}<br>用户ID: ${userId}`;
+                const contractBalanceFormatted = Number(web3.utils.fromWei(contractBalance, 'ether')).toFixed(4);
+                document.getElementById('balanceStatus').innerHTML = `GT余额: ${gtBalanceFormatted}<br>GDOG余额: ${gdogBalanceFormatted}<br>锁仓GDOG: ${lockedGdogFormatted}<br>用户ID: ${userId}<br>合约GDOG余额: ${contractBalanceFormatted}`;
                 document.getElementById('bindButton').disabled = Number(lockedGdogFormatted) < 100000;
                 document.getElementById('voteButton').disabled = Number(gdogBalanceFormatted) <= 0;
                 document.getElementById('networkStatus').innerText = '余额已更新';
@@ -307,19 +311,19 @@
         }
 
         async function bindInfo() {
-            const twitterInput = document.getElementById('twitterInput').value.trim();
-            const telegramInput = document.getElementById('telegramInput').value.trim();
+            const twitterInput = document.getElementById('twitterInput').value.trim().toLowerCase();
+            const telegramInput = document.getElementById('telegramInput').value.trim().toLowerCase();
             const status = document.getElementById('networkStatus');
             const bindButton = document.getElementById('bindButton');
             if (!web3 || !account) {
                 status.innerText = '请连接钱包';
                 return;
             }
-            if (!twitterInput.match(/^https:\/\/x\.com\/[A-Za-z0-9_]+$/)) {
+            if (!twitterInput.match(/^https:\/\/x\.com\/[a-z0-9_]+$/)) {
                 status.innerText = '请输入有效的Twitter链接（https://x.com/username）';
                 return;
             }
-            if (!telegramInput.match(/^https:\/\/t\.me\/[A-Za-z0-9_]+$/)) {
+            if (!telegramInput.match(/^https:\/\/t\.me\/[a-z0-9_]+$/)) {
                 status.innerText = '请输入有效的Telegram链接（https://t.me/username）';
                 return;
             }
@@ -351,6 +355,7 @@
                 await checkBalances();
             } catch (error) {
                 status.innerText = error.code === 4001 ? '用户取消交易' : `绑定失败: ${error.message}`;
+                console.error('Bind Error:', error);
             } finally {
                 bindButton.disabled = false;
                 bindButton.innerHTML = '绑定信息';
@@ -370,8 +375,8 @@
                 status.innerText = '请输入有效的候选人钱包地址';
                 return;
             }
-            if (!voteAmount || isNaN(voteAmount) || Number(voteAmount) <= 0) {
-                status.innerText = '请输入有效的投票数量（大于0）';
+            if (!voteAmount || isNaN(voteAmount) || Number(voteAmount) <= 0 || Number(voteAmount) % 1 !== 0) {
+                status.innerText = '请输入有效的投票数量（整数，例如 1, 2, 3）';
                 return;
             }
             try {
@@ -415,13 +420,14 @@
                     gas: web3.utils.toHex(Math.min(estimatedGas * 2, 3000000))
                 });
                 await waitForTransaction(tx.transactionHash);
-                status.innerText = '投票成功！';
+                status.innerText = `投票成功！30% (${(Number(voteAmount) * 0.3).toFixed(2)} GDOG) 存入合约，70% (${(Number(voteAmount) * 0.7).toFixed(2)} GDOG) 转给候选人`;
                 document.getElementById('voteAddress').value = '';
                 document.getElementById('voteAmount').value = '';
                 await checkBalances();
                 await updateTopVotedUsers();
             } catch (error) {
                 status.innerText = error.code === 4001 ? '用户取消交易' : `投票失败: ${error.message}`;
+                console.error('Vote Error:', error);
             } finally {
                 voteButton.disabled = false;
                 voteButton.innerHTML = '投票';
@@ -429,7 +435,7 @@
         }
 
         async function queryInfo() {
-            const queryInput = document.getElementById('queryInput').value.trim();
+            const queryInput = document.getElementById('queryInput').value.trim().toLowerCase();
             const queryStatus = document.getElementById('queryStatus');
             if (!web3) {
                 queryStatus.innerText = '请连接钱包';
@@ -443,7 +449,7 @@
                     const [id, lockedBalance, twitter, telegram, voteCount, votesCast] = result;
                     const lockedBalanceFormatted = Number(web3.utils.fromWei(lockedBalance, 'ether')).toFixed(4);
                     queryStatus.innerHTML = `地址: ${queryInput.slice(0, 6)}...${queryInput.slice(-4)}<br>用户ID: ${id}<br>锁仓GDOG: ${lockedBalanceFormatted}<br>Twitter: <a href="${twitter}" target="_blank" class="text-primary hover:underline">${twitter}</a><br>Telegram: <a href="${telegram}" target="_blank" class="text-primary hover:underline">${telegram}</a><br>获得票数: ${voteCount}<br>投出票数: ${votesCast}`;
-                } else if (queryInput.match(/^https:\/\/x\.com\/[A-Za-z0-9_]+$/)) {
+                } else if (queryInput.match(/^https:\/\/x\.com\/[a-z0-9_]+$/)) {
                     try {
                         result = await retryContractCall(() => communityContract.methods.getUserInfoByTwitter(queryInput).call());
                         const [user, id, lockedBalance, telegram, voteCount, votesCast] = result;
@@ -456,7 +462,7 @@
                             throw error;
                         }
                     }
-                } else if (queryInput.match(/^https:\/\/t\.me\/[A-Za-z0-9_]+$/)) {
+                } else if (queryInput.match(/^https:\/\/t\.me\/[a-z0-9_]+$/)) {
                     try {
                         result = await retryContractCall(() => communityContract.methods.getUserInfoByTelegram(queryInput).call());
                         const [user, id, lockedBalance, twitter, voteCount, votesCast] = result;
@@ -530,24 +536,24 @@
             document.getElementById('voteButton').addEventListener('click', vote);
             document.getElementById('queryButton').addEventListener('click', queryInfo);
             document.getElementById('twitterInput').addEventListener('input', () => {
-                const twitter = document.getElementById('twitterInput').value.trim();
-                const telegram = document.getElementById('telegramInput').value.trim();
-                document.getElementById('bindButton').disabled = !twitter.match(/^https:\/\/x\.com\/[A-Za-z0-9_]+$/) || !telegram.match(/^https:\/\/t\.me\/[A-Za-z0-9_]+$/);
+                const twitter = document.getElementById('twitterInput').value.trim().toLowerCase();
+                const telegram = document.getElementById('telegramInput').value.trim().toLowerCase();
+                document.getElementById('bindButton').disabled = !twitter.match(/^https:\/\/x\.com\/[a-z0-9_]+$/) || !telegram.match(/^https:\/\/t\.me\/[a-z0-9_]+$/);
             });
             document.getElementById('telegramInput').addEventListener('input', () => {
-                const twitter = document.getElementById('twitterInput').value.trim();
-                const telegram = document.getElementById('telegramInput').value.trim();
-                document.getElementById('bindButton').disabled = !twitter.match(/^https:\/\/x\.com\/[A-Za-z0-9_]+$/) || !telegram.match(/^https:\/\/t\.me\/[A-Za-z0-9_]+$/);
+                const twitter = document.getElementById('twitterInput').value.trim().toLowerCase();
+                const telegram = document.getElementById('telegramInput').value.trim().toLowerCase();
+                document.getElementById('bindButton').disabled = !twitter.match(/^https:\/\/x\.com\/[a-z0-9_]+$/) || !telegram.match(/^https:\/\/t\.me\/[a-z0-9_]+$/);
             });
             document.getElementById('voteAddress').addEventListener('input', () => {
                 const candidateAddress = document.getElementById('voteAddress').value.trim();
                 const voteAmount = document.getElementById('voteAmount').value.trim();
-                document.getElementById('voteButton').disabled = !web3.utils.isAddress(candidateAddress) || !voteAmount || isNaN(voteAmount) || Number(voteAmount) <= 0;
+                document.getElementById('voteButton').disabled = !web3.utils.isAddress(candidateAddress) || !voteAmount || isNaN(voteAmount) || Number(voteAmount) <= 0 || Number(voteAmount) % 1 !== 0;
             });
             document.getElementById('voteAmount').addEventListener('input', () => {
                 const candidateAddress = document.getElementById('voteAddress').value.trim();
                 const voteAmount = document.getElementById('voteAmount').value.trim();
-                document.getElementById('voteButton').disabled = !web3.utils.isAddress(candidateAddress) || !voteAmount || isNaN(voteAmount) || Number(voteAmount) <= 0;
+                document.getElementById('voteButton').disabled = !web3.utils.isAddress(candidateAddress) || !voteAmount || isNaN(voteAmount) || Number(voteAmount) <= 0 || Number(voteAmount) % 1 !== 0;
             });
 
             const menuToggle = document.getElementById('menuToggle');
