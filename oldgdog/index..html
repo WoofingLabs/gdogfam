@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GDOG Balance Checker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        textarea, button {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        textarea {
+            background-color: #2d2d2d;
+            border: 1px solid #4b4b4b;
+            color: #ffffff;
+            resize: vertical;
+        }
+        button {
+            background-color: #0068FF;
+            color: #ffffff;
+            border: none;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0052cc;
+        }
+        button:disabled {
+            background-color: #4b4b4b;
+            cursor: not-allowed;
+        }
+        #result {
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .error {
+            color: #ff4d4d;
+        }
+        .success {
+            color: #18E5A0;
+        }
+        .total {
+            font-weight: 700;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-3xl font-bold text-center mb-6">GDOG Balance Checker</h1>
+        <p class="text-center text-gray-400 mb-4">Enter wallet addresses (one per line)</p>
+        <textarea id="addresses" rows="5" placeholder="0xA037355662d34D9B57dE209E22544a4862F5A30c&#10;0xAnotherAddress"></textarea>
+        <button id="checkButton" class="mt-4">Check Balances</button>
+        <div id="result" class="text-sm"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.7.0/dist/web3.min.js"></script>
+    <script>
+        const GDOG_ADDRESS = '0xA037355662d34D9B57dE209E22544a4862F5A30c';
+        const RPC_URLS = [
+            'https://gatelayer-mainnet.gatenode.cc',
+        ];
+
+        const erc20Abi = [
+            {
+                "constant": true,
+                "inputs": [{"name": "_owner", "type": "address"}],
+                "name": "balanceOf",
+                "outputs": [{"name": "balance", "type": "uint256"}],
+                "stateMutability": "view",
+                "type": "function"
+            }
+        ];
+
+        let web3, gdogContract;
+
+        async function initializeWeb3() {
+            for (const rpcUrl of RPC_URLS) {
+                try {
+                    web3 = new Web3(rpcUrl);
+                    gdogContract = new web3.eth.Contract(erc20Abi, GDOG_ADDRESS);
+                    // Test connection by calling a simple method
+                    await gdogContract.methods.balanceOf('0x0000000000000000000000000000000000000000').call();
+                    return true;
+                } catch (error) {
+                    console.warn(`RPC ${rpcUrl} failed: ${error.message}`);
+                }
+            }
+            return false;
+        }
+
+        // Utility function to introduce a 1-second delay
+        function delay(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        async function checkBalances() {
+            const checkButton = document.getElementById('checkButton');
+            const resultDiv = document.getElementById('result');
+            const addressesInput = document.getElementById('addresses').value.trim();
+            const addresses = addressesInput.split('\n').map(addr => addr.trim()).filter(addr => addr);
+
+            if (addresses.length === 0) {
+                resultDiv.innerHTML = '<p class="error">Please enter at least one wallet address.</p>';
+                return;
+            }
+
+            checkButton.disabled = true;
+            checkButton.innerText = 'Checking...';
+            resultDiv.innerHTML = '<p>Fetching balances...</p>';
+
+            // Initialize Web3 with fallback RPCs
+            const initialized = await initializeWeb3();
+            if (!initialized) {
+                resultDiv.innerHTML = '<p class="error">Error: All RPC endpoints failed. Please try again later.</p>';
+                checkButton.disabled = false;
+                checkButton.innerText = 'Check Balances';
+                return;
+            }
+
+            try {
+                let output = '';
+                let totalBalance = 0;
+
+                // Process addresses sequentially with 1-second delay
+                for (let i = 0; i < addresses.length; i++) {
+                    const address = addresses[i];
+                    if (!web3.utils.isAddress(address)) {
+                        output += `<p class="error">${address}: Invalid address</p>`;
+                    } else {
+                        try {
+                            const balance = await gdogContract.methods.balanceOf(address).call();
+                            const balanceFormatted = Number(web3.utils.fromWei(balance, 'ether')).toFixed(4);
+                            totalBalance += Number(balanceFormatted);
+                            output += `<p class="success">${address}: ${balanceFormatted} GDOG</p>`;
+                        } catch (error) {
+                            output += `<p class="error">${address}: Error fetching balance - ${error.message}</p>`;
+                        }
+                    }
+                    // Update UI after each address
+                    resultDiv.innerHTML = output + (i < addresses.length - 1 ? '<p>Fetching more balances...</p>' : '');
+                    // Wait 1 second before processing the next address
+                    if (i < addresses.length - 1) {
+                        await delay(1000);
+                    }
+                }
+
+                // Add total balance
+                output += `<p class="total">Total GDOG Balance: ${totalBalance.toFixed(4)} GDOG</p>`;
+                resultDiv.innerHTML = output;
+            } catch (error) {
+                resultDiv.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+            } finally {
+                checkButton.disabled = false;
+                checkButton.innerText = 'Check Balances';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('checkButton').addEventListener('click', checkBalances);
+        });
+    </script>
+</body>
+</html>
